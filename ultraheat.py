@@ -1,13 +1,13 @@
 ##################################################################################################
-# Script to read telegram from Landis&Gyr Ultraheat UH50 (T550)                                                      #
+# Script to read telegram from Landis&Gyr Ultraheat UH50 (T550)                                  #
 #                                                                                                #
-# This script sends the kWh and m3 values to Home Assistant in JSON format                        #
+# This script sends the kWh and m3 values to Home Assistant in JSON format                       #
 # Exact Home Assistant configuration to be given                                                 #
 #                                                                                                #
 # Source:                                                                                        #
 # Script from Magnat in https://gathering.tweakers.net/forum/list_messages/1535019               #
 #                                                                                                #
-# Requirement: Python3                                                                           #
+# Requirement: Python3, BlockingScheduler                                                        #
 ##################################################################################################
 
 import serial
@@ -18,9 +18,13 @@ import json
 from apscheduler.schedulers.blocking import BlockingScheduler
 import pickle
 import datetime
+import time
 import os
+import schedule
 
 os.environ['TZ'] = 'Europe/Stockholm'
+
+scheduler = BlockingScheduler()
 
 
 # Only run first time:
@@ -30,10 +34,14 @@ os.environ['TZ'] = 'Europe/Stockholm'
 #pickle.dump( store, open( "lastm3value.p", "wb" ) )
 #pickle.dump( store, open( "lastm3.p", "wb" ) )
 
+@scheduler.scheduled_job('cron', hour=0, minute=1, timezone='Europe/Stockholm')
 def resetValue():
     reset = "0"
     pickle.dump( reset, open( "lastkwh.p", "wb" ) )
+    pickle.dump( reset, open( "lastm3.p", "wb" ) )
+    print("Values set to 0")
 
+@scheduler.scheduled_job('cron', hour='0-23', timezone='Europe/Stockholm')
 def getData():
 
     conn = serial.Serial('/dev/ttyUSB0',
@@ -103,20 +111,19 @@ def getData():
                 # -- m3 calc end --
 
                 # Json to Home Assistant
-                url = 'http://192.168.X.X:8123/api/webhook/XXXXX'
+                url = 'http://192.168.X.X:8123/api/webhook/fjarrvarme'
                 myobj = {'kwh': newKwh, 'm3': newM3}
 
                 x = requests.post(url, json = myobj)
 
                 print(json.dumps({"kWh": newKwh, "m3": newM3}))
+                break
 
-                counter = counter + 1
+            counter = counter + 1
+
     finally:
         conn.close()
+        print("Read done")
 
-scheduler = BlockingScheduler()
-scheduler.add_job(getData, 'cron', hour="1-23", timezone='Europe/Stockholm')
-scheduler.add_job(getData, 'cron', hour=23, minute=59, timezone='Europe/Stockholm')
 #scheduler.add_job(getData, 'interval', seconds=20) # Only for test 20 seconds interval
-scheduler.add_job(resetValue, 'cron', hour=0, timezone='Europe/Stockholm')
 scheduler.start()
