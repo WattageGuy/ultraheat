@@ -1,4 +1,4 @@
-# Ultraheat with HTTP request
+# Ultraheat to HTTP request
 Script to read information from Landis+Gyr Ultraheat (UH50, T550)
 
 This modified script sends the kWh and m3 values to Home Assistant or any other platform with that can receive webhook. 
