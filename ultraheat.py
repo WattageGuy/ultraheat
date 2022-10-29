@@ -112,7 +112,7 @@ def getData():
 
                 # Json to Home Assistant
                 url = 'http://192.168.X.X:8123/api/webhook/fjarrvarme'
-                myobj = {'kwh': newKwh, 'm3': newM3}
+                myobj = {'kwh': newKwh, 'm3': newM3, 'kwhh': kwhDiff, 'm3h': m3Diff}
 
                 x = requests.post(url, json = myobj)
 
