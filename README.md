@@ -1,12 +1,12 @@
 # Ultraheat to HTTP request
 Script to read information from Landis+Gyr Ultraheat (UH50, T550)
 
-This modified script sends the kWh and m3 values to Home Assistant or any other platform with that can receive webhook. 
+This modified script sends the kWh and m3 values to Home Assistant or any other platform that can receive webhook. 
 
 ## Installation and usage:
 This script uses a optical probe (IEC 62056-21) on an USB port to read the telegrams from the meter.
 
-Add a custom sensor with kWh and m3 (Add through input_number sensor Home Assistant) and an automation that changes this value on webhook. Example:
+Add a custom sensor with kWh and m3 (Add through input_number sensor in Home Assistant) and an automation that changes this value on webhook. Example:
 ```
 alias: Fjärrvärme förbrukning
 description: ""
